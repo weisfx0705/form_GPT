@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Form AI Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="icon">
+                    <path
+                        d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7 7h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2zm10 2h-6v-2h6v2zm0-4h-6v-2h6v2zm0-4h-6V7h6v2z" />
+                </svg>
+                <h1>FormGen AI</h1>
+            </div>
+            <button id="apiKeyBtn" class="icon-btn" title="設定 API Key">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"
+                    fill="currentColor">
+                    <path
+                        d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm-40-82v-78q-33 0-56.5-23.5T360-320v-40L168-552q-3 18-5.5 36t-2.5 36q0 121 79.5 212T440-162Zm276-102q20-22 36-47.5t26.5-53q10.5-27.5 16-56.5t5.5-59q0-98-54.5-179T600-776v16q0 33-23.5 56.5T520-680h-80v80q0 17-11.5 28.5T400-560h-80v80h240q17 0 28.5 11.5T600-440v120h40q26 0 47 15.5t29 40.5Z" />
+                </svg>
+            </button>
+        </header>
+
+        <main id="mainContent">
+            <!-- Step 1: Input -->
+            <section id="step1" class="step-section active">
+                <div class="card glass-card">
+                    <h2>開始建立您的表單</h2>
+                    <p class="subtitle">告訴 AI 您的需求，我們將為您生成完美的 Google Form。</p>
+
+                    <div class="input-group">
+                        <label for="formPurpose">表單目的</label>
+                        <input type="text" id="formPurpose" placeholder="例如：公司員工滿意度調查、週末聚餐報名表..." autocomplete="off">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="formConditions">詳細條件與需求</label>
+                        <textarea id="formConditions" rows="4" placeholder="例如：
+- 需要包含姓名、部門
+- 詢問對工作環境的滿意度（1-5分）
+- 有什麼建議想對公司說
+- 必須收集 Email"></textarea>
+                    </div>
+
+                    <button id="generateBtn" class="primary-btn">
+                        <span class="btn-text">生成題目</span>
+                        <div class="loader hidden"></div>
+                    </button>
+                    <div id="errorMessage" class="error-message hidden"></div>
+                </div>
+            </section>
+
+            <!-- Step 2: Review -->
+            <section id="step2" class="step-section hidden">
+                <div class="card glass-card">
+                    <div class="section-header">
+                        <h2>確認表單內容</h2>
+                        <p class="subtitle">您可以編輯、刪除或新增題目，確認無誤後將生成程式碼。</p>
+                    </div>
+
+                    <div id="questionsList" class="questions-list">
+                        <!-- Questions will be injected here -->
+                    </div>
+
+                    <div class="actions">
+                        <button id="addQuestionBtn" class="secondary-btn">+ 新增題目</button>
+                        <div class="button-row">
+                            <button id="backToStep1Btn" class="text-btn">返回修改需求</button>
+                            <button id="confirmBtn" class="primary-btn">確認並生成程式碼</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 3: Result & Tutorial -->
+            <section id="step3" class="step-section hidden">
+                <div class="card glass-card">
+                    <div class="success-header">
+                        <div class="check-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                            </svg>
+                        </div>
+                        <h2>程式碼已生成！</h2>
+                    </div>
+
+                    <div class="result-actions">
+                        <button id="copyCodeMainBtn" class="primary-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20"
+                                fill="currentColor" style="margin-right: 8px;">
+                                <path
+                                    d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z" />
+                            </svg>
+                            複製程式碼
+                        </button>
+                        <a href="https://script.google.com/" target="_blank" class="secondary-btn"
+                            style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20"
+                                fill="currentColor" style="margin-right: 8px;">
+                                <path
+                                    d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z" />
+                            </svg>
+                            前往 Google Apps Script
+                        </a>
+                    </div>
+
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="code">App Script 程式碼</button>
+                        <button class="tab-btn" data-tab="tutorial">使用教學</button>
+                    </div>
+
+                    <div class="tab-content active" id="codeTab">
+                        <div class="code-block-wrapper">
+                            <pre><code id="generatedCode" class="language-javascript">// Code will appear here</code></pre>
+                            <button id="copyCodeBtn" class="copy-btn">複製程式碼</button>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="tutorialTab">
+                        <div class="tutorial-steps">
+                            <div class="step-item">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h3>開啟 Google Apps Script</h3>
+                                    <p>前往 <a href="https://script.google.com/home/start"
+                                            target="_blank">script.google.com</a> 並點擊左上角的「新專案」。</p>
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h3>貼上程式碼</h3>
+                                    <p>清除編輯器中原有的所有程式碼，然後貼上剛剛複製的程式碼。</p>
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h3>儲存並執行</h3>
+                                    <p>點擊磁片圖示儲存（命名為「表單生成器」），然後點擊「執行」按鈕。</p>
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <h3>授權權限</h3>
+                                    <p>首次執行會要求授權。點擊「審查權限」 -> 選擇帳號 -> 「進階」 -> 「前往...（不安全）」 -> 「允許」。</p>
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-number">5</div>
+                                <div class="step-content">
+                                    <h3>完成！</h3>
+                                    <p>查看執行紀錄中的網址，或是前往您的 Google Drive 查看新生成的表單。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="restartBtn" class="secondary-btn full-width">製作新表單</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- API Key Modal -->
+        <div id="apiModal" class="modal hidden">
+            <div class="modal-content glass-card">
+                <h3>設定 Google Gemini API Key</h3>
+                <p>為了使用 AI 生成功能，請輸入您的 Gemini API Key。</p>
+                <div class="input-group">
+                    <input type="password" id="apiKeyInput" placeholder="Paste your API key here">
+                </div>
+
+                <div id="modelSelectionSection" class="input-group hidden">
+                    <label for="modelSelect"
+                        style="margin-top: 12px; display: block; color: #ccc; font-size: 14px;">選擇模型 (Model)</label>
+                    <div style="display: flex; gap: 8px;">
+                        <select id="modelSelect" class="model-select">
+                            <option value="" disabled selected>請先輸入 API Key...</option>
+                        </select>
+                        <button id="refreshModelsBtn" class="icon-btn-small" title="重新整理模型列表">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20"
+                                fill="currentColor">
+                                <path
+                                    d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-38-60-97-96t-129-36q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <p class="hint">您可以從 <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI
+                        Studio</a> 免費獲取。</p>
+                <div class="modal-actions">
+                    <button id="saveApiKeyBtn" class="primary-btn">儲存</button>
+                    <button id="closeModalBtn" class="text-btn">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
