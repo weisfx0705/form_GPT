@@ -27,7 +27,9 @@
                 </svg>
                 <h1>FormGen AI</h1>
             </div>
-            <button id="apiKeyBtn" class="icon-btn" title="設定 API Key">
+            <button id="apiKeyBtn" class="secondary-btn" title="設定 API Key"
+                style="display: flex; align-items: center; gap: 8px;">
+                <span>設置 API Key</span>
                 <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"
                     fill="currentColor">
                     <path
@@ -186,21 +188,8 @@
                     <input type="password" id="apiKeyInput" placeholder="Paste your API key here">
                 </div>
 
-                <div id="modelSelectionSection" class="input-group hidden">
-                    <label for="modelSelect"
-                        style="margin-top: 12px; display: block; color: #ccc; font-size: 14px;">選擇模型 (Model)</label>
-                    <div style="display: flex; gap: 8px;">
-                        <select id="modelSelect" class="model-select">
-                            <option value="" disabled selected>請先輸入 API Key...</option>
-                        </select>
-                        <button id="refreshModelsBtn" class="icon-btn-small" title="重新整理模型列表">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20"
-                                fill="currentColor">
-                                <path
-                                    d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-38-60-97-96t-129-36q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z" />
-                            </svg>
-                        </button>
-                    </div>
+                <div class="input-group" style="margin-top: 15px; color: #ccc; font-size: 14px;">
+                    <p>目前使用的模型：<strong>gemini-2.5-flash</strong></p>
                 </div>
 
                 <p class="hint">您可以從 <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI

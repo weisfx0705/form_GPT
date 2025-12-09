@@ -2,7 +2,8 @@
 let state = {
     step: 1,
     apiKey: localStorage.getItem('gemini_api_key') || '',
-    selectedModel: localStorage.getItem('gemini_model') || '',
+    apiKey: localStorage.getItem('gemini_api_key') || '',
+    //    selectedModel: localStorage.getItem('gemini_model') || '', // Removed dynamic model selection
     purpose: '',
     conditions: '',
     questions: []
@@ -16,9 +17,9 @@ const elements = {
     apiKeyBtn: document.getElementById('apiKeyBtn'),
     apiModal: document.getElementById('apiModal'),
     apiKeyInput: document.getElementById('apiKeyInput'),
-    modelSelect: document.getElementById('modelSelect'),
-    refreshModelsBtn: document.getElementById('refreshModelsBtn'),
-    modelSelectionSection: document.getElementById('modelSelectionSection'),
+    //    modelSelect: document.getElementById('modelSelect'),
+    //    refreshModelsBtn: document.getElementById('refreshModelsBtn'),
+    //    modelSelectionSection: document.getElementById('modelSelectionSection'),
     saveApiKeyBtn: document.getElementById('saveApiKeyBtn'),
     closeModalBtn: document.getElementById('closeModalBtn'),
     formPurpose: document.getElementById('formPurpose'),
@@ -42,11 +43,11 @@ async function init() {
         showModal();
     } else {
         elements.apiKeyInput.value = state.apiKey;
-        elements.modelSelectionSection.classList.remove('hidden');
-        await populateModelSelect(state.apiKey);
-        if (state.selectedModel) {
-            elements.modelSelect.value = state.selectedModel;
-        }
+        // elements.modelSelectionSection.classList.remove('hidden'); // Removed
+        // await populateModelSelect(state.apiKey); // Removed
+        // if (state.selectedModel) {
+        //     elements.modelSelect.value = state.selectedModel;
+        // }
     }
     setupEventListeners();
 }
@@ -61,34 +62,17 @@ function setupEventListeners() {
             state.apiKey = key;
             localStorage.setItem('gemini_api_key', key);
 
-            // Show model selector and fetch models
-            elements.modelSelectionSection.classList.remove('hidden');
-            await populateModelSelect(key);
+            // Show model selector and fetch models -> REMOVED
+            // elements.modelSelectionSection.classList.remove('hidden');
+            // await populateModelSelect(key);
 
-            // Don't close modal immediately, let user see models
-            // But if they just want to save and close, maybe we should?
-            // Let's close it for now to keep flow simple, or maybe wait?
-            // The user might want to select a model.
-            // Let's NOT close modal if it's the first time? 
-            // Actually, usually 'Save' implies done. 
-            // But we added a model selector. 
-            // Let's just refresh models and keep modal open? 
-            // Or close it. The user can open it again to change model.
-            // Better: Close it. If they want to change model, they click the key icon.
             hideModal();
         }
     });
 
-    elements.refreshModelsBtn.addEventListener('click', () => {
-        if (state.apiKey) {
-            populateModelSelect(state.apiKey);
-        }
-    });
-
-    elements.modelSelect.addEventListener('change', (e) => {
-        state.selectedModel = e.target.value;
-        localStorage.setItem('gemini_model', state.selectedModel);
-    });
+    // Removed model selection listeners
+    // elements.refreshModelsBtn.addEventListener('click', ...);
+    // elements.modelSelect.addEventListener('change', ...);
 
     // Navigation
     elements.generateBtn.addEventListener('click', handleGenerateQuestions);
@@ -218,7 +202,7 @@ async function callGeminiAPI(purpose, conditions) {
     `;
 
     // Use selected model or fallback
-    const modelId = state.selectedModel || 'gemini-1.5-flash';
+    const modelId = 'gemini-2.5-flash';
     console.log(`Generating with selected model: ${modelId}`);
 
     try {
@@ -475,86 +459,8 @@ function generateAppScript(questions, title) {
     return script;
 }
 
-async function populateModelSelect(apiKey) {
-    const select = elements.modelSelect;
-    select.innerHTML = '<option value="" disabled selected>載入中...</option>';
-    select.disabled = true;
+// Removed populateModelSelect and fetchAvailableModels functions
 
-    const models = await fetchAvailableModels(apiKey);
-
-    select.innerHTML = '';
-    select.disabled = false;
-
-    if (models && models.length > 0) {
-        // Sort models: preferred ones first
-        const preferredOrder = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.0-pro', 'gemini-pro'];
-
-        models.sort((a, b) => {
-            const nameA = a.name.replace('models/', '');
-            const nameB = b.name.replace('models/', '');
-            const indexA = preferredOrder.findIndex(p => nameA.includes(p));
-            const indexB = preferredOrder.findIndex(p => nameB.includes(p));
-
-            if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-            if (indexA !== -1) return -1;
-            if (indexB !== -1) return 1;
-            return nameA.localeCompare(nameB);
-        });
-
-        models.forEach(model => {
-            const option = document.createElement('option');
-            const modelId = model.name.replace('models/', '');
-            option.value = modelId;
-            option.textContent = `${model.displayName || modelId} (${modelId})`;
-            select.appendChild(option);
-        });
-
-        // Restore selection or default to first
-        if (state.selectedModel && models.some(m => m.name.includes(state.selectedModel))) {
-            select.value = state.selectedModel;
-        } else {
-            select.value = select.options[0].value;
-            state.selectedModel = select.value;
-            localStorage.setItem('gemini_model', state.selectedModel);
-        }
-    } else {
-        select.innerHTML = '<option value="" disabled>無法取得模型列表</option>';
-        const fallbacks = ['gemini-1.5-flash', 'gemini-1.5-flash-002', 'gemini-pro'];
-        fallbacks.forEach(id => {
-            const option = document.createElement('option');
-            option.value = id;
-            option.textContent = id + ' (Fallback)';
-            select.appendChild(option);
-        });
-        select.value = fallbacks[0];
-        state.selectedModel = fallbacks[0];
-    }
-}
-
-async function fetchAvailableModels(apiKey) {
-    console.log('Fetching available models...');
-    try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-        if (!response.ok) {
-            console.warn('Failed to list models:', response.status, response.statusText);
-            return null;
-        }
-        const data = await response.json();
-        if (!data.models) return null;
-
-        // Filter for models that support generateContent
-        const validModels = data.models.filter(m =>
-            m.supportedGenerationMethods &&
-            m.supportedGenerationMethods.includes('generateContent')
-        );
-
-        console.log('Available models:', validModels.map(m => m.name));
-        return validModels;
-    } catch (e) {
-        console.error('Error fetching models:', e);
-        return null;
-    }
-}
 
 // Start
 init();
