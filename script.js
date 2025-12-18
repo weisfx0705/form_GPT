@@ -202,7 +202,7 @@ async function callGeminiAPI(purpose, conditions) {
     `;
 
     // Use selected model or fallback
-    const modelId = 'gemini-2.5-flash';
+    const modelId = 'gemini-3-flash-preview';
     console.log(`Generating with selected model: ${modelId}`);
 
     try {
