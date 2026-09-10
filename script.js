@@ -1,7 +1,8 @@
 // State
+const GEMINI_MODEL = 'gemini-3.8-flash';
+
 let state = {
     step: 1,
-    apiKey: localStorage.getItem('gemini_api_key') || '',
     apiKey: localStorage.getItem('gemini_api_key') || '',
     //    selectedModel: localStorage.getItem('gemini_model') || '', // Removed dynamic model selection
     purpose: '',
@@ -202,24 +203,22 @@ async function callGeminiAPI(purpose, conditions) {
     `;
 
     // Use selected model or fallback
-    const modelId = 'gemini-3-flash-preview';
+    const modelId = GEMINI_MODEL;
     console.log(`Generating with selected model: ${modelId}`);
 
     try {
-        // Ensure model name has 'models/' prefix if not present (API usually accepts both but being explicit is safer)
-        // Actually, the v1beta/models/{model} endpoint expects just the ID or models/ID. 
-        // The list endpoint returns 'models/gemini-pro'.
-        // Let's handle both cases by stripping 'models/' and letting the URL construction add it if needed, 
-        // OR just using the full name if it already has it.
+        // Ensure model name has no 'models/' prefix before constructing the v1beta URL.
         // The URL below is .../models/${model}:generateContent
-        // If model is 'gemini-pro', it becomes .../models/gemini-pro...
-        // If model is 'models/gemini-pro', it becomes .../models/models/gemini-pro... which is WRONG.
+        // If model already starts with 'models/', it would become .../models/models/... which is wrong.
         // So we must ensure clean ID.
         const cleanModelId = modelId.replace(/^models\//, '');
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${cleanModelId}:generateContent?key=${state.apiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${cleanModelId}:generateContent`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': state.apiKey
+            },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }]
             })
